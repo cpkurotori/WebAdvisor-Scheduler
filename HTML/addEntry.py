@@ -4,8 +4,8 @@ from flaskext.mysql import MySQL
 #Class Definition of Course, Section and Meeting
 """
 class Course:
-    def __init__(self,sections[0],credits,subject,course_number,title,desc):
-        self.sections[0] = sections[0] # list of section objects #
+    def __init__(self,sections,credits,subject,course_number,title,desc):
+        self.sections = sections # list of section objects #
         self.credits = credits # string #ex "" #
         self.subject = subject #string 
         self.course_number = course_number #string
@@ -46,31 +46,41 @@ def convertDict(schedules):
                 'desc' : schedules[s][c].desc
             }
             scheduleDict['schedules']['S'+str(s)]['C'+str(c)]['section'] = {
-                'startDate': str(schedules[s][c].sections[0].startDate),
-                'endDate': str(schedules[s][c].sections[0].endDate),
-                'section_number': schedules[s][c].sections[0].section_number,
+                'startDate': str(schedules[s][c].sections.startDate),
+                'endDate': str(schedules[s][c].sections.endDate),
+                'section_number': schedules[s][c].sections.section_number,
                 'meetings': {}
             }
-            for m in range(len(schedules[s][c].sections[0].meetings)):
+            for m in range(len(schedules[s][c].sections.meetings)):
                 scheduleDict['schedules']['S'+str(s)]['C'+str(c)]['section']['meetings']['M'+str(m)]= {
-                    'meetingType' : schedules[s][c].sections[0].meetings[m].meetingType,
-                    'campus' : schedules[s][c].sections[0].meetings[m].campus,
-                    'startTime' : str(schedules[s][c].sections[0].meetings[m].startTime),
-                    'endTime' : str(schedules[s][c].sections[0].meetings[m].endTime),
-                    'professorName' : schedules[s][c].sections[0].meetings[m].professorName,
-                    'room' : schedules[s][c].sections[0].meetings[m].room,
+                    'meetingType' : schedules[s][c].sections.meetings[m].meetingType,
+                    'campus' : schedules[s][c].sections.meetings[m].campus,
+                    'startTime' : str(schedules[s][c].sections.meetings[m].startTime),
+                    'endTime' : str(schedules[s][c].sections.meetings[m].endTime),
+                    'professorName' : schedules[s][c].sections.meetings[m].professorName,
+                    'room' : schedules[s][c].sections.meetings[m].room,
                     'recurrence' : {}
                 }
-                for r in range(len(schedules[s][c].sections[0].meetings[m].recurrence)):
-                    scheduleDict['schedules']['S'+str(s)]['C'+str(c)]['section']['meetings']['M'+str(m)]['recurrence']['R'+str(r)]= schedules[s][c].sections[0].meetings[m].recurrence[r]
+                for r in range(len(schedules[s][c].sections.meetings[m].recurrence)):
+                    scheduleDict['schedules']['S'+str(s)]['C'+str(c)]['section']['meetings']['M'+str(m)]['recurrence']['R'+str(r)]= schedules[s][c].sections.meetings[m].recurrence[r]
     return json.dumps(scheduleDict)
 
 def addEntry(schedules, mysql):
-    jsonStr = convertDict(schedules)
+    s = '\\"'
+    jsonStr = s.join(convertDict(schedules).split('"'))
     conn = mysql.connect()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO dotslash (schedules) VALUES(\'"+jsonStr+"\')")
+    cursor.execute('INSERT INTO dotslash (schedules) VALUES("'+jsonStr+'")')
     conn.commit()
     tokenID = cursor.lastrowid
+    cursor.close()
+    conn.close()
+    return tokenID
+
+def removeEntry(db_id, mysql):
+    conn = mysql.connect()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM dotslash WHERE id="+db_id)
+    conn.commit()
     cursor.close()
     conn.close()

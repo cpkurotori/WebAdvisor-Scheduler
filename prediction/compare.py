@@ -48,6 +48,8 @@ class MeetingWrapper:
     # allowance is the number of seconds that two classes can overlap and not return true
     # returns true if other_meeting overlaps with this one, false otherwise
     def overlaps_with(self, other_meeting, allowance=0):
+        if self.room == "TBA" or self.room =="WEB" or other_meeting.room=="TBA" or other_meeting.room == "WEB":
+            return False
         if self.day == other_meeting.day:
             earlier = min(self, other_meeting, key=lambda m: m.startTime)
             later   = max(self, other_meeting, key=lambda m: m.startTime)
@@ -108,7 +110,6 @@ def compare(section_list, section):
     # status the status to append to suces_list
     success_list = [] 
     status = 0
-
     for sec in section_list:
         omts = overlapped_meeting_times(sec, section)
         if omts: # if there are overlapped meeting times

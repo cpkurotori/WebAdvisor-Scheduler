@@ -417,7 +417,7 @@
           url : '/selectSchedule',
           method : "GET",
           data : {
-            i : 26,
+            i : dbid,
             s : $('select#schedulesDrop').val()
           },
           success : function(data){
@@ -431,26 +431,27 @@
           }
         });
       });
-	  });
-    $.ajax({
-            url : '/selectSchedule',
-            method : "GET",
-            data : {
-              i : 26,
-              s : $('select#schedulesDrop').val()
-            },
-            success : function(data){
-              //This is the code that generates the the div events on the calendar
-              schedule = JSON.parse(data); //JSON string
-              populateCalendar(schedule);
-              console.log("success");
-            },
-            error : function(){
-              console.log("fail!")
-            }
-          });
+
+	    $.ajax({
+        url : '/selectSchedule',
+        method : "GET",
+        data : {
+          i : dbid,
+          s : $('select#schedulesDrop').val()
+        },
+        success : function(data){
+          //This is the code that generates the the div events on the calendar
+          schedule = JSON.parse(data); //JSON string
+          populateCalendar(schedule);
+          console.log("success");
+        },
+        error : function(){
+          console.log("fail!")
+        }
+      });
+    });
     function populateCalendar(schedule){
-      var days = {Monday:"evmon", Tuesday:"evtue", Wednesday:"evwed", Thursday:"evthu", Friday:"evfri", Saturday:"evsat"};
+      var days = {'MO':"evmon", 'TU':"evtue", 'WE':"evwed", 'TH':"evthu", 'FR':"evfri", 'SA':"evsat"};
       for (day in days) {
         eventCol = document.getElementById(days[day]);
         while (eventCol.hasChildNodes()){

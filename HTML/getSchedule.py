@@ -4,7 +4,7 @@ from flaskext.mysql import MySQL
 def accessDatabase(db_id,mysql):
     conn = mysql.connect()
     cur = conn.cursor()
-    cur.execute("SELECT schedules FROM dotslash WHERE id=\'"+str(db_id)+"\'")
+    cur.execute("SELECT schedules FROM dotslash WHERE id="+str(db_id))
     schedules = cur.fetchall()[0][0]
     cur.close()
     conn.close()

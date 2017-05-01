@@ -6,11 +6,12 @@ Created on Fri Mar 31 17:14:00 2017
 """
 
 def ourKey(course_list):
+    if len(course_list) == 1:
+        return course_list
     course_dict = {}
     for course in course_list:
         course_dict[course] = len(course.sections)   
-    if len(course_list) == 1:
-        return course_list
+
     """
     else:
         sorted_course_list = [] 

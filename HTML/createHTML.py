@@ -2,7 +2,7 @@ import os
 from HTML import getDept
 from bs4 import BeautifulSoup
 
-def createHome():
+def createHome(notes=None):
     soup = BeautifulSoup(open('templates/home.html'),'html.parser')
     soup.prettify()
     generated = '''
@@ -37,6 +37,10 @@ def createHome():
             <input type="submit" value="Generate"/></center></form></body>'''
     generated = BeautifulSoup (generated,'html.parser')
     soup.center.append(generated)
+    if not notes is None:
+        if not notes['error'] is None:
+            error = notes['error']
+            soup.find(id='error').append(BeautifulSoup(error,'html.parse'))
     with open('static/home.html', mode='wt') as file:
         file.write(str(soup))
     print ("home.html created...")
@@ -49,6 +53,9 @@ def createCalendar(count,db_id=None):
         text += '<option value="'+str(i)+'">'+str(i+1)+'</option><br>'
     text += '</select>'
     soup.find(id="scheduleList").append(BeautifulSoup(text,'html.parser'))
+    if not db_id is None:
+        idtext = BeautifulSoup('<script>var dbid='+str(db_id)+'</script>','html.parser')
+        soup.body.append(idtext)
     with open('static/calendar.html',mode='wt') as file:
         file.write(str(soup))
     print ("calendar.html created")
