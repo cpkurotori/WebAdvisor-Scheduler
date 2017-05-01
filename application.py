@@ -6,7 +6,7 @@ from HTML import testcase
 from HTML import addEntry
 from HTML import getSchedule
 import predtest
-from prediction.schedule_generator import schedule_generator
+from prediction.schedule_generator_datatype import scheduleGenerator
 
 application = Flask(__name__)
 mysql = MySQL()
@@ -27,8 +27,7 @@ def index():
 @application.route("/calendar", methods=["post"])
 def calendar():
     #tempTest = testcase.testcase
-    import pdb; pdb.set_trace()
-    tempTest = predtest.predtest #this is merely a test case of a lists of schedules with lists of courses
+    tempTest = scheduleGenerator(predtest.testcase) #this is merely a test case of a lists of schedules with lists of courses
     index = addEntry.addEntry(tempTest,mysql)  
     createHTML.createCalendar(len(tempTest),index)
     return application.send_static_file("calendar.html")

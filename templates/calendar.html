@@ -461,7 +461,7 @@
       i = 1;
       for (course in schedule) {
         for (meeting in schedule[course]["section"]["meetings"]) {
-          var div = '<div class="event ev'+String(i)+'" id="event'+String(i)+'"style="height:'+String(calculateDuration(schedule[course]["section"]["meetings"][meeting]['startTime'],schedule[course]["section"]["meetings"][meeting]['endTime']))+'px; top:'+String(calculateStart(schedule[course]["section"]["meetings"][meeting]['startTime'])-220)+'px"></div>'
+          var div = '<div class="event ev'+String(i)+'" id="event'+String(i)+'"style="height:'+String(calculateDuration(schedule[course]["section"]["meetings"][meeting]['startTime'],schedule[course]["section"]["meetings"][meeting]['endTime']))+'px; top:'+String(calculateStart(schedule[course]["section"]["meetings"][meeting]['startTime'])-220)+'px"><p class="event-text">'+schedule[course]["subject"]+schedule[course]["course_number"]+'-'+schedule[course]["section"]["section_number"]+'</p></div>'
           for (recurr in schedule[course]["section"]["meetings"][meeting]["recurrence"]){
             console.log(days[schedule[course]["section"]["meetings"][meeting]["recurrence"][recurr]]);
             $('#'+days[schedule[course]["section"]["meetings"][meeting]["recurrence"][recurr]]).append(div)

@@ -54,34 +54,43 @@ def duration(meeting): # meeting object
 def firstEarlier(first,second):
     return totalSeconds(second.startTime)-totalSeconds(first.startTime) > 0
 
-def compareMeetings(meetingList,comparison): #list of meeting objects, meeting object
+def compareMeetings(meeting,comparison): #list of meeting objects, meeting object
     skips = ['TBA','TBADISTANCE LEARNING VIA WEB','TBD']
-    if len(meetingList)==0:
-        return True
-    for meeting in meetingList:
-        for recurrence in meeting.recurrence:
-            if recurrence in comparison.recurrence:
-                if (not meeting.campus in skips) and (not comparison.campus in skips):
-                    if meeting.campus != comparison.campus:
-                        allotted = 900
-                    else:
-                        allotted = 0
-                    if firstEarlier(meeting,comparison):
-                        first,second = meeting,comparison
-                    else:
-                        first,second = comparison,meeting
-                    if duration(first)+duration(second)+allotted>totalSeconds(second.endTime)-totalSeconds(first.startTime):
-                        print ("Meeting Bad...")
-                        return False
-                    else:
-                        print ("Meeting Good...")
-            else:
-                print ("Different Days. Meeting Good...")
-    return compareMeetings(meetingList[1:],meetingList[0])
+    if firstEarlier(meeting,comparison):
+        first,second = meeting,comparison
+    else:
+        first,second = comparison,meeting    
+    for recurrence in first.recurrence:
+        if recurrence in second.recurrence:
+            if (not first.campus in skips) and (not second.campus in skips):
+                if first.campus != second.campus:
+                    allotted = 900
+                else:
+                    allotted = 0
+                print ("First: "+str(first.professorName)+':'+str(first.meetingType))
+                print ("Second: "+str(second.professorName)+':'+str(second.meetingType))
+                print ("Duration first: "+str(duration(first)))
+                print ("Duration second: "+str(duration(second)))
+                print ("Allotted Transfer: "+str(allotted))
+                print ("Sum: "+str(duration(first)+duration(second)+allotted))
+                print ("Actual time between start and end: "+str(totalSeconds(second.endTime)-totalSeconds(first.startTime)))
+                if duration(first)+duration(second)+allotted>totalSeconds(second.endTime)-totalSeconds(first.startTime):
+                    print ("Meeting Bad...")
+                    return False
+                else:
+                    print ("Meeting Good...")
+        else:
+            print ("Different Days. Meeting Good...")
+    return True
 
 def compareSections(first,second): #section object, section object
-    meetingList = splitMeetings(first)+splitMeetings(second)
-    return compareMeetings(meetingList[1:],meetingList[0])
+    firstList = splitMeetings(first)
+    secondList = splitMeetings(second)
+    for meeting in firstList:
+        for smeeting in secondList:
+            if not compareMeetings(meeting,smeeting):
+                return False
+    return True
 
 def addNonConflict(root,section): #SectionList object, SectionList object
     if root.course == section.course:

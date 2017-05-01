@@ -154,3 +154,9 @@ div.event.ev6 {
   background-color: rgb(171,136,189);
   border: 1px solid rgb(102,82,112);
 }
+
+.event-text {
+  text-align: center;
+  position: relative;
+  top: 30%;
+}

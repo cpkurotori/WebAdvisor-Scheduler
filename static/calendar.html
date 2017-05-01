@@ -398,7 +398,7 @@
 <div class="rightSchedule" id="scheduleList">
 <p class="text-center">Your Schedule</p>
 <div class="listSchedule" id="listBtn"></div>
-<select id="schedulesDrop" name="schedules">"<option value="0">1</option><br><option value="1">2</option><br/></br></select></div>
+<select id="schedulesDrop" name="schedules">"<option value="0">1</option><br><option value="1">2</option><br><option value="2">3</option><br><option value="3">4</option><br><option value="4">5</option><br><option value="5">6</option><br><option value="6">7</option><br><option value="7">8</option><br><option value="8">9</option><br><option value="9">10</option><br><option value="10">11</option><br><option value="11">12</option><br/></br></br></br></br></br></br></br></br></br></br></br></select></div>
 </div>
 </div>
 <!--
@@ -461,7 +461,7 @@
       i = 1;
       for (course in schedule) {
         for (meeting in schedule[course]["section"]["meetings"]) {
-          var div = '<div class="event ev'+String(i)+'" id="event'+String(i)+'"style="height:'+String(calculateDuration(schedule[course]["section"]["meetings"][meeting]['startTime'],schedule[course]["section"]["meetings"][meeting]['endTime']))+'px; top:'+String(calculateStart(schedule[course]["section"]["meetings"][meeting]['startTime'])-220)+'px"></div>'
+          var div = '<div class="event ev'+String(i)+'" id="event'+String(i)+'"style="height:'+String(calculateDuration(schedule[course]["section"]["meetings"][meeting]['startTime'],schedule[course]["section"]["meetings"][meeting]['endTime']))+'px; top:'+String(calculateStart(schedule[course]["section"]["meetings"][meeting]['startTime'])-220)+'px"><p class="event-text">'+schedule[course]["subject"]+schedule[course]["course_number"]+'-'+schedule[course]["section"]["section_number"]+'</p></div>'
           for (recurr in schedule[course]["section"]["meetings"][meeting]["recurrence"]){
             console.log(days[schedule[course]["section"]["meetings"][meeting]["recurrence"][recurr]]);
             $('#'+days[schedule[course]["section"]["meetings"][meeting]["recurrence"][recurr]]).append(div)
@@ -493,5 +493,5 @@
     }
 
 	</script>
-<script>var dbid=236</script></body>
+<script>var dbid=247</script></body>
 </html>

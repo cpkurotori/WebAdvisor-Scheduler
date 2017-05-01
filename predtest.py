@@ -13,7 +13,7 @@ recurrence = ["MO","WE"]
 C1S1M1 = Meeting(meetingType,campus,startTime,endTime,professorName,room,recurrence)
 
 #Meeting 2, Section 1, Course 1
-meetingtype = "Laboratory"
+meetingType = "Laboratory"
 campus = "Newark"
 startTime = datetime.time(8,5)
 endTime = datetime.time(10,10)
@@ -23,7 +23,7 @@ recurrence = ["MO","WE"]
 C1S1M2 = Meeting(meetingType,campus,startTime,endTime,professorName,room,recurrence)
 
 #Meeting 3, Section 1, Course 1
-meetingtype = "Lab Overload"
+meetingType = "Lab Overload"
 campus = "TBA"
 startTime = datetime.time(0,0)
 endTime = datetime.time(0,0)
@@ -123,7 +123,7 @@ recurrence = ["MO","WE"]
 C2S1M1 = Meeting(meetingType,campus,startTime,endTime,professorName,room,recurrence)
 
 #Meeting 2, Section 1, Course 2
-meetingtype = "Text One-Way Lab Days"
+meetingType = "Text One-Way Lab Days"
 campus = "TBADISTANCE LEARNING VIA WEB"
 startTime = datetime.time(0,0)
 endTime = datetime.time(0,0)
@@ -152,7 +152,7 @@ recurrence = ["MO","WE"]
 C2S2M1 = Meeting(meetingType,campus,startTime,endTime,professorName,room,recurrence)
 
 #Meeting 2, Section 2, Course 2
-meetingtype = "Text One-Way Lab Days"
+meetingType = "Text One-Way Lab Days"
 campus = "TBADISTANCE LEARNING VIA WEB"
 startTime = datetime.time(0,0)
 endTime = datetime.time(0,0)
@@ -181,7 +181,7 @@ recurrence = ["MO","WE"]
 C2S3M1 = Meeting(meetingType,campus,startTime,endTime,professorName,room,recurrence)
 
 #Meeting 2, Section 3, Course 2
-meetingtype = "Text One-Way Lab Days"
+meetingType = "Text One-Way Lab Days"
 campus = "TBADISTANCE LEARNING VIA WEB"
 startTime = datetime.time(0,0)
 endTime = datetime.time(0,0)
