@@ -70,6 +70,7 @@ def addEntry(schedules, mysql):
     jsonStr = s.join(convertDict(schedules).split('"'))
     conn = mysql.connect()
     cursor = conn.cursor()
+    cursor.execute('DELETE FROM dotslash WHERE TIMESTAMPDIFF(HOUR,t,CURRENT_TIMESTAMP()) > 2')
     cursor.execute('INSERT INTO dotslash (schedules) VALUES("'+jsonStr+'")')
     conn.commit()
     tokenID = cursor.lastrowid
@@ -80,7 +81,8 @@ def addEntry(schedules, mysql):
 def removeEntry(db_id, mysql):
     conn = mysql.connect()
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM dotslash WHERE id="+db_id)
+    cursor.execute("DELETE FROM dotslash WHERE id="+str(db_id))
     conn.commit()
+    print ("DELETING DB ID: "+str(db_id))
     cursor.close()
     conn.close()

@@ -366,14 +366,12 @@
 								<td class="scbldr" id="scbldr-sat-odd"></td>
 							</tr>
 						</table>
-						<div class="events-container">
+						<div class="overlay events-container">
 							<table class="events-grid">
 								<tr class="events-row">
 									<td class="ev mon" id="evmon">
-										 <div class="event ev1" id="event1" style="height:90px; top:400px"></div>
 									</td>
 									<td class="ev tue" id="evtue">
-										<div class="event ev2" id="event2" style="height:142px; top:200px"></div>
 									</td>
 									<td class="ev wed" id="evwed">
 										<!-- <div class="event ev3" id="event3" style="height:100px; top:174.6px"></div> -->
@@ -412,7 +410,7 @@
 	<script>
     var schedule
 		$(document).ready(function(){
-      $('select#schedulesDrop').change(function() {
+      $(document).on('change','select#schedulesDrop',function() {
         $.ajax({
           url : '/selectSchedule',
           method : "GET",
@@ -432,6 +430,14 @@
         });
       });
 
+      $(document).on('mouseenter','div.event',
+      	function() {
+      	$('#hover'+this.attributes.number.value).show();});
+
+      $(document).on('mouseleave','div.event',
+      	function() {
+      	$('#hover'+this.attributes.number.value).hide();});
+
 	    $.ajax({
         url : '/selectSchedule',
         method : "GET",
@@ -450,21 +456,63 @@
         }
       });
     });
+/*
+    $(window).on("unload",function(){
+    	$.ajax({
+    		url : '/deleteEntry',
+    		method : "GET",
+    		data : {
+    			i : dbid
+    		}
+    	});
+    });
+*/
     function populateCalendar(schedule){
       var days = {'MO':"evmon", 'TU':"evtue", 'WE':"evwed", 'TH':"evthu", 'FR':"evfri", 'SA':"evsat"};
+      var fullday = {'MO':"Monday", 'TU':"Tuesday", 'WE':"Wednesday", 'TH':"Thursday", 'FR':"Friday", 'SA':"Saturday"};
       for (day in days) {
-        eventCol = document.getElementById(days[day]);
-        while (eventCol.hasChildNodes()){
-          eventCol.removeChild(eventCol.childNodes[0]);
-        }
-      }
+	      eventCol = document.getElementById(days[day]);
+	      while (eventCol.hasChildNodes()){
+	        eventCol.removeChild(eventCol.childNodes[0]);
+	      }
+	    }
       i = 1;
       for (course in schedule) {
         for (meeting in schedule[course]["section"]["meetings"]) {
-          var div = '<div class="event ev'+String(i)+'" id="event'+String(i)+'"style="height:'+String(calculateDuration(schedule[course]["section"]["meetings"][meeting]['startTime'],schedule[course]["section"]["meetings"][meeting]['endTime']))+'px; top:'+String(calculateStart(schedule[course]["section"]["meetings"][meeting]['startTime'])-220)+'px"><p class="event-text">'+schedule[course]["subject"]+schedule[course]["course_number"]+'-'+schedule[course]["section"]["section_number"]+'</p></div>'
+        	var j = 0;
           for (recurr in schedule[course]["section"]["meetings"][meeting]["recurrence"]){
+          	var recurring = "";
+          	var count = 1;
+          	for (k in schedule[course]["section"]["meetings"][meeting]["recurrence"])
+          	{
+          		recurring += fullday[schedule[course]["section"]["meetings"][meeting]["recurrence"][k]];
+          		if (count != Object.keys(schedule[course]["section"]["meetings"][meeting]["recurrence"]).length){
+          				recurring += ', ';
+          			}
+          		count++;
+          	} 
+          	var time = schedule[course]["section"]["meetings"][meeting]["startTime"];
+          	var hour = parseInt(time.substr(0,2));
+          	var minute = time.substr(3,2);
+          	var half = "am"
+          	if (hour > 12){
+          		hour -= 12;
+          		half = "pm";
+          	}
+          	var startt = String(hour)+':'+minute+' '+half; 
+          	time = schedule[course]["section"]["meetings"][meeting]["endTime"];
+          	var hour = parseInt(time.substr(0,2));
+          	var minute = time.substr(3,2);
+          	var half = "am"
+          	if (hour > 12){
+          		hour -= 12;
+          		half = "pm";
+          	}
+          	var endt = String(hour)+':'+minute+' '+half; 
+          	var div = '<div class="event ev'+String(i)+'" number="'+String(i)+'_'+String(j)+'" id="event'+String(i)+'_'+String(j)+'"style="height:'+String(calculateDuration(schedule[course]["section"]["meetings"][meeting]['startTime'],schedule[course]["section"]["meetings"][meeting]['endTime']))+'px; top:'+String(calculateStart(schedule[course]["section"]["meetings"][meeting]['startTime'])-220)+'px"><p class="event-text">'+schedule[course]["subject"]+schedule[course]["course_number"]+'-'+schedule[course]["section"]["section_number"]+'</p><div class="hover-item" id="hover'+String(i)+'_'+String(j)+'""><table class="hover-description"><tr><td><strong>Course Title:</strong> '+schedule[course]["title"]+'</td></tr><tr><td><strong>Course Code:</strong> '+schedule[course]["subject"]+schedule[course]["course_number"]+"-"+schedule[course]["section"]["section_number"]+'</td></tr><tr><td><strong>Professor:</strong> '+schedule[course]["section"]['meetings'][meeting]["professorName"]+'</td></tr><tr><td><strong>Start Time:</strong> '+startt+'</td></tr><tr><td><strong>End Time:</strong> '+endt+'</td></tr><tr><td><strong>Recurrence:</strong> '+recurring+'</td></tr> </table></div></div>';
             console.log(days[schedule[course]["section"]["meetings"][meeting]["recurrence"][recurr]]);
-            $('#'+days[schedule[course]["section"]["meetings"][meeting]["recurrence"][recurr]]).append(div)
+            $('#'+days[schedule[course]["section"]["meetings"][meeting]["recurrence"][recurr]]).append(div);
+          j++;
           }
         }
       i++;

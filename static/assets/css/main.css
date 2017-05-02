@@ -28,12 +28,20 @@
     display: inline-block;
   }
 
-.events-container {
+.overlay{
   position: absolute;
   top: 0px;
   left: 0px;
   width: 100%;
   height: 100%;
+}
+
+.events-container{
+
+}
+
+.hover-container{
+
 }
 
 .events-grid {
@@ -122,6 +130,7 @@ div.event {
   height: 30px;
   width: 16.66666666%;
   border-radius: 0.75em;
+  padding: 5px 5px 5px 5px;
 }
 
 
@@ -155,8 +164,32 @@ div.event.ev6 {
   border: 1px solid rgb(102,82,112);
 }
 
-.event-text {
+p.event-text {
+  vertical-align: middle;
   text-align: center;
-  position: relative;
-  top: 30%;
+  font-family: Helvetica;
+  font-size: 10px;
+  z-index: 3;
+}
+
+.hover-item {
+  -o-transition:.5s;
+  -ms-transition:.5s;
+  -moz-transition:.5s;
+  -webkit-transition:.5s;
+  transition: .5s;
+  display: none;
+  text-align: center;
+  padding: 5px 5px 5px 5px;
+  background-color: rgba(255,255,255,.9);
+  position: absolute;
+  width: 400px;
+  top: 110%;
+  left: 0%;
+  border: 4px solid black;
+  z-index: 2;
+}
+
+.hover-description {
+  text-align: left;
 }
