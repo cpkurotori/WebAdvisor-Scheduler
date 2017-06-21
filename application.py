@@ -7,6 +7,7 @@ from HTML import addEntry
 from HTML import getSchedule
 import predtest
 from prediction.scheduleGenerator import scheduleGenerator
+import os
 
 
 #Initialized the Database using Flask
@@ -57,4 +58,4 @@ if __name__ == "__main__":
 	# Setting debug to True enables debug output. This line should be
 	# removed before deploying a production application.
 	application.debug = True
-	application.run()
+	application.run(host=os.getenv('IP', '0.0.0.0'),port=int(os.getenv('PORT', 8080)))
