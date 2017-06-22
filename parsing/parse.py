@@ -1,118 +1,65 @@
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.select import Select
-import os
-import re
-from datetime import date
 from bs4 import BeautifulSoup
 from HTML import getDept
+import pymysql
+from Templates import classes
 
-# updateDepartments(term,depts=getDept.gatherFields().dept)
-# term = YYYYTT i.e. 2017SU - string
-# depts = ditionary of department codes : department - both are strings
-# returns boolean - true for success
-# in folder courselists, there is a course list for each department for a given term
 
-def updateDepartments(term,depts=getDept.gatherFields().dept):
-	print ("Initializing browser...")
-	# browser = webdriver.Chrome() # use ChromeDriver
-	browser = webdriver.PhantomJS('phantomjs') # use PhantomJS - GhostDriver
-	browser.implicitly_wait(5)
+def parseHTML(term,depts=getDept.gatherFields().dept):
+	try:
+		cnx = pymysql.connect(user='root', password='password', host='localhost',database='Schedule')
+	except:
+		print ("Failed to open connection to database.")
+		exit(1)
+	cur = cnx.cursor()
 	for dept in depts:
-		print ("Working on dept:",dept+'|')
-		if dept == '':
+		if not checkTable (cur,term):
 			continue
-		tries = 0
-		success = False
-		while not success and tries < 2:
-			success = gatherDept(term,dept,browser)
-			tries += 1
-			print("Try",tries)
-		if not success and tries == 2:
-			print("Failed to get dept",dept+'|')
+		if not importDept(cur,term,dept):
+			print ("Failed to import",dept)
 			continue
+	cur.close()
+	cnx.close()
 	
-# gatherDept(term, dept)
-# term = YYYYTT i.e. 2017SU - string
-# dept = department code - string
-# returns boolean - true for success
-# navegates to the page of all courses for a specified dept and term
-def gatherDept(term,dept,browser):
+	
+def checkTable (cur,term):
+	createIfNone = 'CREATE TABLE IF NOT EXISTS '+term+' (title VARCHAR(40), dept VARCHAR(6), courseNum VARCHAR(6), sectionNum VARCHAR(6), description VARCHAR(100), credits DECIMAL(3,2), startD DATE, endD DATE, meetingInfo VARCHAR(255), faculty VARCHAR(255), comments VARCHAR(255),section_id INT(11) NOT NULL AUTO_INCREMENT,PRIMARY KEY (section_id));'
 	try:
-		navegateSearch(browser)
+		cur.execute(createIfNone)
 	except:
+		print ("Failed to create table.")
 		return False
-	try:
-		print("Selecting",term)
-		Select(browser.find_element_by_id('VAR1')).select_by_value(term)
-		print("Selecting",'|'+dept+'|')
-		Select(browser.find_element_by_id('LIST_VAR1_1')).select_by_value(dept)
-		print("Clicking submit")
-		browser.find_element_by_name('SUBMIT2').click()
-	except:
-		return False
-	return getCourseHTML(term,dept,browser)
-	
-	
-	
-# def navegateSearch(browser)
-# browser = selenium.webdriver.phantomjs.webdriver.WebDriver session
-# opens up to the Search for Sections page on webAdvisor
-def navegateSearch(browser):
-	print("Opening webadvisor...")
-	browser.get('https://webadvisor.ohlone.edu')
-	print("Navegating to Students...")
-	browser.find_element_by_link_text("Students").click()
-	print("Navegating to Search for Sections...")
-	browser.find_element_by_link_text("Search for Sections").click()
-	
-# getCourseHTML(browser)
-# term = YYYYTT i.e. 2017SU - string
-# dept = department code - string
-# browser = selenium.webdriver.phantomjs.webdriver.WebDriver session
-# saves html for each course in that dept to a file called courselists/[TERM][DEPT].txt
-def getCourseHTML(term,dept,browser):
-	soup_html = BeautifulSoup(browser.page_source,'html.parser')
-	try:
-		end = int(re.findall(r'Page [\w?]+ of [\w?]+',str(soup_html))[0].split(' ')[-1])
-	except:
-		return False
-	if not os.path.exists(os.path.dirname('courselists/'+term+'/')):
-	    try:
-	        os.makedirs(os.path.dirname('courselists/'+term+'/'))
-	    except:
-	    	return False
-	f = open('courselists/'+term+'/'+dept+'.txt','w')
-	f.write(dept+ " courses for "+term+' updated: '+str(date.today())+'\n----------------------------------\n\n-------\n')
-	home = browser.window_handles[0]
-	for page in range(end):
-		done = False
-		print("Working on page "+str(page+1))
-		for i in range(20):
-			print("Working on course "+str(i+1))
-			try:
-				browser.find_element_by_id('SEC_SHORT_TITLE_'+str(i+1)).click()
-			except:
-				done = True
-				break
-			getPage(browser,f)
-			browser.switch_to_window(home)
-			if not done:
-				browser.find_element_by_xpath('//*[@id="GROUP_Grp_WSS_COURSE_SECTIONS"]/table[1]/tbody/tr/td[1]/input[3]').click()
-	f.close()
 	return True
 
-# getPage(browser,file)
-# browser = selenium.webdriver.phantomjs.webdriver.WebDriver session
-# file = io opened file for writing
-# writes the html to a file
-def getPage(browser,file):
-	try:
-		browser.switch_to_window(browser.window_handles[-1])
-		#print("Course recorded.")
-		file.write(browser.page_source)
-		file.write('\n-------\n')
-		browser.close()
-	except:
-		return False
+def importDept(cur,term,dept):
+	with open('courselists/'+term+'/'+dept+'.txt','r') as file:
+		coursesHTML = file.read()
+	coursesList = coursesHTML[coursesHTML.find('\n-------\n'):].split('\n-------\n')
+	for course in coursesList:
+		if course == '':
+			continue
+		elif not parse(cur,course):
+			return False
 	return True
+		
+def parse(cur,course):
+	soup = BeautifulSoup(course,'html.parser')
+	title = soup.find(id="VAR1").get_text()
+	dept,courseNum,sectionNum= map(str,soup.find(id="VAR2").get_text().split('-'))
+	description = soup.find(id="VAR15").get_text()
+	credits = float(soup.find(id="VAR4").get_text())
+	startD = soup.find(id="VAR6").get_text()
+	endD = soup.find(id="VAR7").get_text()
+	meetings = None
+	#meetings = parseMeeting (soup.find(id="LIST_VAR12_1").get_text()):
+	i,faculty = 0,[]
+	while True:
+		try:
+			faculty.append(soup.find(id="LIST_VAR7_"+str(i+1)).get_text())
+			i += 1
+		except:
+			print(i,"teacher(s) found.")
+			break
+	return title,dept,courseNum,sectionNum,description,credits,startD,endD,meetings,faculty
+	
+def parseMeeting(meetingInfo):
+	pass
