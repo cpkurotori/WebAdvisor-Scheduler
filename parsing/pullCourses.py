@@ -15,6 +15,9 @@ from HTML import getDept
 # in folder courselists, there is a course list for each department for a given term
 
 def updateDepartments(term,depts=getDept.gatherFields().dept,skips=False):
+	if term not in getDept.gatherFields().terms:
+		print("Invalid Term")
+		exit(1)
 	fails = []
 	good = []
 	if skips:
@@ -114,16 +117,30 @@ def getCourseHTML(term,dept,browser):
 		print("Working on page "+str(page+1))
 		for i in range(20):
 			print("Working on course "+str(i+1))
-			try:
-				browser.find_element_by_id('SEC_SHORT_TITLE_'+str(i+1)).click()
-				count += 1
-			except:
-				if page+1 != end:
-					return False
-				else:
-					break
-			getPage(browser,f)
-			browser.switch_to_window(home)
+			courseTry = 0
+			status = False
+			lastPage = False
+			while not status and courseTry < 3:
+				try:
+					browser.find_element_by_id('SEC_SHORT_TITLE_'+str(i+1)).click()
+				except:
+					if page+1 != end:
+						return False
+					else:
+						status = True
+						lastPage = True
+						break
+				status =  getPage(browser,f)
+				courseTry += 1
+				if not status:
+					print ("Failed to gather course... Try ",courseTry)
+				browser.switch_to_window(home)
+			if not status:
+				print ("Failed to get course section...")
+				return False
+			elif lastPage:
+				break
+			count += 1
 		try:
 			browser.find_element_by_xpath('//*[@id="GROUP_Grp_WSS_COURSE_SECTIONS"]/table[1]/tbody/tr/td[1]/input[3]').click()
 		except:
@@ -137,14 +154,23 @@ def getCourseHTML(term,dept,browser):
 # file = io opened file for writing
 # writes the html to a file
 def getPage(browser,file):
+	browser.switch_to_window(browser.window_handles[-1])
+	page = browser.page_source
+	soup = BeautifulSoup(page,'html.parser')
 	try:
-		browser.switch_to_window(browser.window_handles[-1])
-		#print("Course recorded.")
-		file.write(browser.page_source)
-		file.write('\n-------\n')
-		browser.close()
+		test = soup.find(id="VAR1").get_text()
+		if test == '' or test == '\n':
+			print('No text in fields... (Error Code: 1)')
+			browser.close()
+			return False
 	except:
+		print('Failed to load correct page... (Error Code: 2)')
+		browser.close()
 		return False
+	#print("Course recorded.")
+	file.write(page)
+	file.write('\n-------\n')
+	browser.close()
 	return True
 	
 	
