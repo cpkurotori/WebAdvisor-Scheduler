@@ -35,11 +35,14 @@ def gatherFields():
 	#browser = webdriver.Chrome() #Use ChromeDriver
 	browser = webdriver.PhantomJS('phantomjs') #Use PhantomJS - GhostDriver
 	browser.implicitly_wait(5)
-	browser.get('https://webadvisor.ohlone.edu')
-	browser.find_element_by_link_text("Students").click()
-	browser.find_element_by_link_text("Search for Sections").click()
-	soup_html = BeautifulSoup(browser.page_source,'html.parser')
-	termsList = convertOptions((soup_html.find(id="VAR1")).findAll('option'))
-	deptList = convertOptions((soup_html.find(id="LIST_VAR1_1")).findAll('option'))
-	browser.close()
+	try:
+		browser.get('https://webadvisor.ohlone.edu')
+		browser.find_element_by_link_text("Students").click()
+		browser.find_element_by_link_text("Search for Sections").click()
+		soup_html = BeautifulSoup(browser.page_source,'html.parser')
+		termsList = convertOptions((soup_html.find(id="VAR1")).findAll('option'))
+		deptList = convertOptions((soup_html.find(id="LIST_VAR1_1")).findAll('option'))
+		browser.close()	
+	except:
+		return False
 	return Fields(termsList,deptList)

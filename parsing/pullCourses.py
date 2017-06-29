@@ -6,6 +6,7 @@ from datetime import date
 from bs4 import BeautifulSoup
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from HTML import getDept
+from parsing import progress
 
 # updateDepartments(term,depts=getDept.gatherFields().dept)
 # term = YYYYTT i.e. 2017SU - string
@@ -21,32 +22,37 @@ def updateDepartments(term,depts=getDept.gatherFields().dept,skips=False):
 	fails = []
 	good = []
 	if skips:
-		print("Adding courses to good")
+		#print("Adding courses to good")
 		skipCourses = open(skips)
 		good = skipCourses.read().split('|')
 		skipCourses.close()
-	print ("Initializing browser...")
+	#print ("Initializing browser...")
 	# browser = webdriver.Chrome() # use ChromeDriver
 	browser = webdriver.PhantomJS('phantomjs') # use PhantomJS - GhostDriver
 	browser.implicitly_wait(10)
+	deptCount = 0
+	deptLen = len(depts)
+	printProgressBar(deptCount, deptLen, prefix = 'Progress:', suffix = 'Complete', length = 40)
 	for dept in depts:
-		print ("Working on dept:",dept+'|')
+		deptCount += 1
+		printProgressBar(deptCount, deptLen, prefix = 'Progress:', suffix = 'Complete', length = 40)
+		#print ("Working on dept:",dept+'|')
 		if dept == '':
 			continue
 		elif dept in good:
-			print("Skipping",dept)
+			#print("Skipping",dept)
 			continue
 		tries = 0
 		success = False
 		while not success and tries < 2:
 			success = gatherDept(term,dept,browser)
 			tries += 1
-			print("Try",tries)
+			#print("Try",tries)
 		if success:
 			good.append(dept)
 		elif tries == 2:
 			fails.append(dept)
-			print("Failed to get dept",dept+'|')
+			#print("Failed to get dept",dept+'|')
 			continue
 	for dept in fails:
 		success = gatherDept(term,dept,browser)
@@ -70,11 +76,11 @@ def gatherDept(term,dept,browser):
 	except:
 		return False
 	try:
-		#print("Selecting",term)
+		##print("Selecting",term)
 		Select(browser.find_element_by_id('VAR1')).select_by_value(term)
-		#print("Selecting",'|'+dept+'|')
+		##print("Selecting",'|'+dept+'|')
 		Select(browser.find_element_by_id('LIST_VAR1_1')).select_by_value(dept)
-		#print("Clicking submit")
+		##print("Clicking submit")
 		browser.find_element_by_name('SUBMIT2').click()
 	except:
 		return False
@@ -86,11 +92,11 @@ def gatherDept(term,dept,browser):
 # browser = selenium.webdriver.phantomjs.webdriver.WebDriver session
 # opens up to the Search for Sections page on webAdvisor
 def navegateSearch(browser):
-	#print("Opening webadvisor...")
+	##print("Opening webadvisor...")
 	browser.get('https://webadvisor.ohlone.edu')
-	#print("Navegating to Students...")
+	##print("Navegating to Students...")
 	browser.find_element_by_link_text("Students").click()
-	#print("Navegating to Search for Sections...")
+	##print("Navegating to Search for Sections...")
 	browser.find_element_by_link_text("Search for Sections").click()
 	
 # getCourseHTML(browser)
@@ -114,9 +120,9 @@ def getCourseHTML(term,dept,browser):
 	home = browser.window_handles[0]
 	count = 0
 	for page in range(end):
-		print("Working on page "+str(page+1))
+		#print("Working on page "+str(page+1))
 		for i in range(20):
-			print("Working on course "+str(i+1))
+			#print("Working on course "+str(i+1))
 			courseTry = 0
 			status = False
 			lastPage = False
@@ -133,10 +139,10 @@ def getCourseHTML(term,dept,browser):
 				status =  getPage(browser,f)
 				courseTry += 1
 				if not status:
-					print ("Failed to gather course... Try ",courseTry)
+					#print ("Failed to gather course... Try ",courseTry)
 				browser.switch_to_window(home)
 			if not status:
-				print ("Failed to get course section...")
+				#print ("Failed to get course section...")
 				return False
 			elif lastPage:
 				break
@@ -145,7 +151,7 @@ def getCourseHTML(term,dept,browser):
 			browser.find_element_by_xpath('//*[@id="GROUP_Grp_WSS_COURSE_SECTIONS"]/table[1]/tbody/tr/td[1]/input[3]').click()
 		except:
 			return False
-	print (dept,"Department: ",count,"course(s).")
+	#print (dept,"Department: ",count,"course(s).")
 	f.close()
 	return True
 
@@ -160,14 +166,14 @@ def getPage(browser,file):
 	try:
 		test = soup.find(id="VAR1").get_text()
 		if test == '' or test == '\n':
-			print('No text in fields... (Error Code: 1)')
+			#print('No text in fields... (Error Code: 1)')
 			browser.close()
 			return False
 	except:
-		print('Failed to load correct page... (Error Code: 2)')
+		#print('Failed to load correct page... (Error Code: 2)')
 		browser.close()
 		return False
-	#print("Course recorded.")
+	##print("Course recorded.")
 	file.write(page)
 	file.write('\n-------\n')
 	browser.close()
