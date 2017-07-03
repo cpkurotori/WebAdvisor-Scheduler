@@ -32,10 +32,11 @@ def updateDepartments(term,depts=getDept.gatherFields().dept,skips=False):
 	browser.implicitly_wait(10)
 	deptCount = 0
 	deptLen = len(depts)
-	printProgressBar(deptCount, deptLen, prefix = 'Progress:', suffix = 'Complete', length = 40)
+	print ("Number of departments:",deptLen)
+	progress.printProgressBar(deptCount, deptLen, prefix = 'Progress:', suffix = 'Complete', length = 40)
 	for dept in depts:
 		deptCount += 1
-		printProgressBar(deptCount, deptLen, prefix = 'Progress:', suffix = 'Complete', length = 40)
+		progress.printProgressBar(deptCount, deptLen, prefix = 'Progress:', suffix = 'Complete', length = 40)
 		#print ("Working on dept:",dept+'|')
 		if dept == '':
 			continue
@@ -64,6 +65,7 @@ def updateDepartments(term,depts=getDept.gatherFields().dept,skips=False):
 	while len(browser.window_handles) > 1:
 		browser.switch_to_window(browser.window_handles[0])
 		browser.close()
+	print (fails)
 	
 # gatherDept(term, dept)
 # term = YYYYTT i.e. 2017SU - string
@@ -138,7 +140,7 @@ def getCourseHTML(term,dept,browser):
 						break
 				status =  getPage(browser,f)
 				courseTry += 1
-				if not status:
+				#if not status:
 					#print ("Failed to gather course... Try ",courseTry)
 				browser.switch_to_window(home)
 			if not status:
